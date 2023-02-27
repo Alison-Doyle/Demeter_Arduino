@@ -1,5 +1,9 @@
-//Importing Libraries
+//Importing Firebase Library
 #include "Firebase_Arduino_WiFiNINA.h"
+#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app/" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
+#define DATABASE_SECRET "SECRET_SOMETHING"
+#define WIFI_SSID "YOUR_WIFI_AP"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 
 //Pins
 int moisturePin = A0;
