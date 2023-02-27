@@ -1,7 +1,0 @@
-{
-    "configuration": "mode=on",
-    "board": "arduino:megaavr:uno2018",
-    "programmer": "medbg",
-    "port": "COM5",
-    "sketch": "demeter_arduino_code\\demeter_arduino_code.ino"
-}
