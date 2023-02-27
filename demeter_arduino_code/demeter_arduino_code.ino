@@ -1,9 +1,9 @@
 //Importing Firebase Library
 #include "Firebase_Arduino_WiFiNINA.h"
 #define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app/" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
-#define DATABASE_SECRET "SECRET_SOMETHING"
-#define WIFI_SSID "YOUR_WIFI_AP"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define DATABASE_SECRET "Mbv7CFfRPZfRRVMn1OdOHTmjDpFLHxVyLtYKsHtD"
+#define WIFI_SSID "Vodafone-Guest"
+#define WIFI_PASSWORD "JBBDMX884K2D7EEK"
 
 //Pins
 int moisturePin = A0;
@@ -12,6 +12,8 @@ int lightPin = A1;
 //Variables
 double currentMoisture = 0;
 double currentLight = 0;
+
+FirebaseData fbdo;
 
 void setup() {
 
