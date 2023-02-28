@@ -5,6 +5,9 @@
 #define WIFI_SSID "Vodafone-Guest"
 #define WIFI_PASSWORD "JBBDMX884K2D7EEK"
 
+//Other Libraries
+#include <WiFiNINA.h>
+
 //Pins
 int moisturePin = A0;
 int lightPin = A1;
