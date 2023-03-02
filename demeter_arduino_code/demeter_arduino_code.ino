@@ -1,7 +1,7 @@
 //Including Firebase Library
 #include "Firebase_Arduino_WiFiNINA.h"
-#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app/" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
-#define DATABASE_SECRET "Mbv7CFfRPZfRRVMn1OdOHTmjDpFLHxVyLtYKsHtD"
+#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
+#define DATABASE_SECRET "sLwXYSlP8Art2uemSScOvYGDmKO2MrGKjDQ1Oxnq"
 #define WIFI_SSID "Alison's Phone"
 #define WIFI_PASSWORD "IWantADirtNap"
 
@@ -10,7 +10,7 @@
 
 //Pins
 float moisturePin = A0;
-float lightPin = A1;
+float lightPin = 8;
 
 //Variables
 double currentMoisture = 0;
@@ -18,6 +18,8 @@ double currentLight = 0;
 
 String moisturePath = "/Current Data/Moisture";
 String lightPath = "/Current Data/UV";
+
+int value = 0;
 
 const String currentDataPath = "/Current Data";
 
@@ -53,15 +55,44 @@ void loop() {
 
   //Fetching Data from Sensor
   currentMoisture = analogRead(moisturePin);
-  currentLight = analogRead(lightPin);
+  currentLight = digitalRead(lightPin);
 
   //Writing Data in Serial
   Serial.println(currentMoisture);
   Serial.println(currentLight);
 
-  //Sending Data to Firebase
-  Firebase.setFloat(fbdo, moisturePath, currentMoisture);
-  Firebase.setFloat(fbdo, lightPath, currentLight);
+  //Sending Moisture to Firebase
+  if (Firebase.setInt(fbdo, "/test/int", 1234)) 
+  {
+    
+    if (fbdo.dataType() == "int") 
+    {
+      value = fbdo.intData();
+      Serial.println(value);
+    }
+
+  }
+  else 
+  {
+    //Failed, then print out the error detail
+    Serial.println(fbdo.errorReason());
+  }
+
+  if (Firebase.setInt(fbdo, "/test/int", 1234)) 
+  {
+    
+    if (fbdo.dataType() == "int") 
+    {
+      value = fbdo.intData();
+      Serial.println(value);
+    }
+
+  }
+  else 
+  {
+    //Failed, then print out the error detail
+    Serial.println(fbdo.errorReason());
+  }
   
   //Delaying Restart
   delay(1000);
