@@ -13,8 +13,8 @@ float moisturePin = A0;
 float lightPin = 8;
 
 //Variables
-double currentMoisture = 0;
-double currentLight = 0;
+int currentMoisture = 0;
+int currentLight = 0;
 
 String moisturePath = "/Current Data/Moisture";
 String lightPath = "/Current Data/UV";
@@ -58,11 +58,11 @@ void loop() {
   currentLight = digitalRead(lightPin);
 
   //Writing Data in Serial
-  Serial.println(currentMoisture);
-  Serial.println(currentLight);
+  //Serial.println(currentMoisture);
+  //Serial.println(currentLight);
 
   //Sending Moisture to Firebase
-  if (Firebase.setInt(fbdo, "/test/int", 1234)) 
+  if (Firebase.setInt(fbdo, "/Current Data/Moisture", currentMoisture)) 
   {
     
     if (fbdo.dataType() == "int") 
@@ -78,7 +78,8 @@ void loop() {
     Serial.println(fbdo.errorReason());
   }
 
-  if (Firebase.setInt(fbdo, "/test/int", 1234)) 
+  //Sending UV to Firebase
+  if (Firebase.setInt(fbdo, "/Current Data/UV", currentLight)) 
   {
     
     if (fbdo.dataType() == "int") 
