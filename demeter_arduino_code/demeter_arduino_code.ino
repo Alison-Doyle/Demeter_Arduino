@@ -1,41 +1,36 @@
-//Including Firebase Library
+//Libraries
 #include "Firebase_Arduino_WiFiNINA.h"
-#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app" //<databaseName>.firebaseio.com or <databaseName>.<region>.firebasedatabase.app
+#include <WiFiNINA.h>
+#include "Si115X.h"
+
+//Setting Up Libraries
+#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app"
 #define DATABASE_SECRET "sLwXYSlP8Art2uemSScOvYGDmKO2MrGKjDQ1Oxnq"
 #define WIFI_SSID "Alison's Phone"
 #define WIFI_PASSWORD "IWantADirtNap"
+FirebaseData fbdo;
 
-//Other Libraries
-#include <WiFiNINA.h>
+Si115X si1151;
 
 //Pins
 float moisturePin = A0;
-float lightPin = 8;
 
 //Variables
-int currentMoisture = 0;
-int currentLight = 0;
-
-String moisturePath = "/Current Data/Moisture";
-String lightPath = "/Current Data/UV";
-
+int moistureLevel = 0;
+int lightLevel = 0;
 int value = 0;
+uint8_t conf[4];
 
-const String currentDataPath = "/Current Data";
+const String currentMoisturePath = "/Current Data/Moisture";
+const String currentLightPath = "/Current Data/Light";
 
-FirebaseData fbdo;
+void setup()
+{
 
-//Arduino Setup
-void setup() {
-
-  //Initialising Serial @ 9600 bits per second
+  //Initialising serial
   Serial.begin(9600);
 
-  //Letting User Know arduino is being set up
-  delay(2000);
-  Serial.println("Setting up arduino... Please wait a moment");
-
-  //Trying to connect to internet
+  //Trying To Connect to Internet
   Serial.print("Connecting to WiFi...");
   int status = WL_IDLE_STATUS;
   while (status != WL_CONNECTED)
@@ -45,32 +40,40 @@ void setup() {
     delay(300);
   }
 
-  //Providing Authentification Data for Firebase
+  Serial.println("");
+  
+  //Connecting to Firebase Database
   Firebase.begin(DATABASE_URL, DATABASE_SECRET, WIFI_SSID, WIFI_PASSWORD);
   Firebase.reconnectWiFi(true);
+
+  //Tring to start up sunlight sensor
+  Serial.print("Connecting to Sunlight Sensor...");
+  while(!si1151.Begin())
+  {
+    Serial.print(".");
+    delay(300);
+  }
+
+  Serial.println("");
   
 }
 
-void loop() {
+void loop()
+{
 
-  //Fetching Data from Sensor
-  currentMoisture = analogRead(moisturePin);
-  currentLight = digitalRead(lightPin);
+  //Fetching Data From Sensors
+  moistureLevel = analogRead(moisturePin);
+  lightLevel = si1151.ReadHalfWord_VISIBLE();
 
-  //Writing Data in Serial
-  //Serial.println(currentMoisture);
-  //Serial.println(currentLight);
+  //Writing Data in serial
+  Serial.print("Moisture Level: ");
+  Serial.println(moistureLevel);
+  Serial.print("Light Level: ");
+  Serial.println(lightLevel);
 
   //Sending Moisture to Firebase
-  if (Firebase.setInt(fbdo, "/Current Data/Moisture", currentMoisture)) 
+  if (Firebase.setInt(fbdo, currentMoisturePath, moistureLevel)) 
   {
-    
-    if (fbdo.dataType() == "int") 
-    {
-      value = fbdo.intData();
-      Serial.println(value);
-    }
-
   }
   else 
   {
@@ -79,23 +82,16 @@ void loop() {
   }
 
   //Sending UV to Firebase
-  if (Firebase.setInt(fbdo, "/Current Data/UV", currentLight)) 
+  if (Firebase.setInt(fbdo, currentLightPath, lightLevel)) 
   {
-    
-    if (fbdo.dataType() == "int") 
-    {
-      value = fbdo.intData();
-      Serial.println(value);
-    }
-
   }
   else 
   {
     //Failed, then print out the error detail
     Serial.println(fbdo.errorReason());
   }
-  
-  //Delaying Restart
+
+  //Delaying Resatrt of Loop
   delay(1000);
-  
+
 }
