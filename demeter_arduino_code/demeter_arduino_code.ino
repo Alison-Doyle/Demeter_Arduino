@@ -21,8 +21,8 @@ int lightLevel = 0;
 int value = 0;
 uint8_t conf[4];
 
-const String currentMoisturePath = "/Current Data/Moisture";
-const String currentLightPath = "/Current Data/Light";
+const String currentMoisturePath = "/Moisture";
+const String currentLightPath = "/Light";
 
 void setup()
 {
