@@ -19,6 +19,8 @@ float moisturePin = A0;
 int moistureLevel = 0;
 int lightLevel = 0;
 int value = 0;
+int minuteCounter = 0;
+int hourCounter = 0;
 uint8_t conf[4];
 
 const String currentMoisturePath = "/Moisture";
@@ -90,6 +92,9 @@ void loop()
     //Failed, then print out the error detail
     Serial.println(fbdo.errorReason());
   }
+
+  minuteCounter += 5;
+  hourCounter += 1;
 
   //Delaying Resatrt of Loop
   delay(1000);
