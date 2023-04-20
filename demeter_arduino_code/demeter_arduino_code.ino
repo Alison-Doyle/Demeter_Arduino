@@ -1,16 +1,26 @@
 //Libraries
+#include "arduino_secrets.h"
 #include "Firebase_Arduino_WiFiNINA.h"
 #include <WiFiNINA.h>
 #include "Si115X.h"
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+ #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
 
 //Setting Up Libraries
-#define DATABASE_URL "demeterdb-100d9-default-rtdb.europe-west1.firebasedatabase.app"
-#define DATABASE_SECRET "sLwXYSlP8Art2uemSScOvYGDmKO2MrGKjDQ1Oxnq"
-#define WIFI_SSID "Alison's Phone"
-#define WIFI_PASSWORD "IWantADirtNap"
+#define DATABASE_URL SECRET_DATABASEURL
+#define DATABASE_SECRET SECRET_DATABASESECRET
+#define WIFI_SSID SECRET_Internet
+#define WIFI_PASSWORD SECRET_InternetPassword
 FirebaseData fbdo;
 
 Si115X si1151;
+
+#define LED_PIN     6 //Where LEDs get info
+#define LED_COUNT  25 //No. LEDs
+#define BRIGHTNESS 50
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
 
 //Pins
 float moisturePin = A0;
@@ -18,6 +28,7 @@ float moisturePin = A0;
 //Variables
 int moistureLevel = 0;
 int lightLevel = 0;
+int minLightLevel;
 int value = 0;
 int minuteCounter = 0;
 int hourCounter = 0;
@@ -57,6 +68,14 @@ void setup()
   }
 
   Serial.println("");
+
+  //Starting LED
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+  #endif
+  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  strip.show();            // Turn OFF all pixels ASAP
+  strip.setBrightness(BRIGHTNESS);
   
 }
 
@@ -72,6 +91,32 @@ void loop()
   Serial.println(moistureLevel);
   Serial.print("Light Level: ");
   Serial.println(lightLevel);
+
+  //Reading In min Light Level for Plant
+  if (Firebase.getInt(fbdo, "/plantSettings/minLightLevel")) 
+  {
+    //If data is valid, assign it to minLightLevel
+    if (fbdo.dataType() == "int") 
+    {
+      minLightLevel = fbdo.intData();
+      Serial.println(minLightLevel);
+    }
+  } 
+  else 
+  {
+    //Failed, then print out the error detail
+    Serial.println(fbdo.errorReason());
+  }
+
+  //Turning on Lights if Light is Low
+  if (lightLevel <= minLightLevel)
+  {
+    colorWipe(strip.Color(255, 255, 255), 50);
+  }
+  else if (lightLevel > minLightLevel)
+  {
+    colorWipe(strip.Color(0,   0,   0), 50);
+  }
 
   //Sending Moisture to Firebase
   if (Firebase.setInt(fbdo, currentMoisturePath, moistureLevel)) 
@@ -99,4 +144,12 @@ void loop()
   //Delaying Resatrt of Loop
   delay(1000);
 
+}
+
+void colorWipe(uint32_t color, int wait) {
+  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+    strip.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
 }
